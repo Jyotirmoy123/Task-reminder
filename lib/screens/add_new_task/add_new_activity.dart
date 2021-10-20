@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:intl/intl.dart';
 import 'package:routine_reminder/database/repository.dart';
-import 'package:routine_reminder/helpers/snack_bar.dart';
+
 import 'package:routine_reminder/models/activities_type.dart';
 import 'package:routine_reminder/models/task.dart';
 import 'package:routine_reminder/notifications/notifications.dart';
@@ -23,8 +23,8 @@ class AddNewActivity extends StatefulWidget {
 class _AddNewActivityState extends State<AddNewActivity> {
   FlutterLocalNotificationsPlugin? flutterLocalNotificationsPlugin;
 
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final Snackbar snackbar = Snackbar();
+ final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  
 
   
   final List<String> weightValues = ["Work", "Fun","Need","Social"];
@@ -87,7 +87,7 @@ class _AddNewActivityState extends State<AddNewActivity> {
     final deviceHeight = MediaQuery.of(context).size.height - 60.0;
 
     return Scaffold(
-      key: _scaffoldKey,
+      key: scaffoldKey,
       resizeToAvoidBottomInset: false,
       backgroundColor: Color.fromRGBO(248, 248, 248, 1),
       body: SafeArea(
@@ -317,10 +317,25 @@ class _AddNewActivityState extends State<AddNewActivity> {
 
   //--------------------------------------SAVE TASK IN DATABASE---------------------------------------
   Future saveTask() async {
+    
+     if (titleController.text.isEmpty || noteController.text.isEmpty) {
+     
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('All Fields are Required'),
+          ),
+        );
+    } else {
+     
     //check if activity time is lower than actual time
     if (setDate.millisecondsSinceEpoch <=
         DateTime.now().millisecondsSinceEpoch) {
-      print("check your activity time and date");
+     // print("check your activity time and date");
+     ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Check your activity time and date'),
+          ),
+        );
     } else {
       //create task object
       Task task = Task(
@@ -337,7 +352,12 @@ class _AddNewActivityState extends State<AddNewActivity> {
         dynamic result =
             await _repository.insertData("Tasks", task.taskToMap());
         if (result == null) {
-          print("something wrong");
+          //print("something wrong");
+          ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Something wrong'),
+          ),
+        );
         } else {
           //set the notification schneudele
           tz.initializeTimeZones();
@@ -351,11 +371,16 @@ class _AddNewActivityState extends State<AddNewActivity> {
         }
       }
       //---------------------------------------------------------------------------------------
-      print("Saved");
+     // print("Saved");
+     ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Saved'),
+          ),
+        );
       Navigator.pop(context);
     }
   }
-
+  }
   //=================================================================================================
 
   //----------------------------CLICK ON TASK FORM CONTAINER----------------------------------------
